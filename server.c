@@ -9,6 +9,8 @@
 #define BUFFER_SIZE 1024
 
 int main() {
+    // Child process id
+    pid_t childpid;
     int server_fd, new_socket;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
@@ -40,13 +42,13 @@ int main() {
         perror("listen");
         exit(EXIT_FAILURE);
     }
-
+while (1) {
     // Accept connection
     if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
         perror("accept");
         exit(EXIT_FAILURE);
     }
-
+    if ((childpid = fork() == 0)){
     // Open WAV file
     wav_file = fopen(wav_file_path, "rb");
     if (wav_file == NULL) {
@@ -74,6 +76,9 @@ int main() {
     // Cleanup
     fclose(wav_file);
     close(new_socket);
+}
+}
+// this would never get closed? mem leak??
     close(server_fd);
 
     return 0;
