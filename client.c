@@ -60,7 +60,8 @@ int main(int argc, char *argv[])
 	while ( (n = read(sockfd, recvBuff, sizeof(recvBuff))) > 0)
 	{
 		//recvBuff[n] = 0;
-		if(fprintf(stdout, "%s", recvBuff) == EOF)
+		if (fwrite(recvBuff, 1, 
+                     sizeof(recvBuff), stdout) == 0)
 		{
 			fprintf(stderr, "\n Error : Fputs error\n");
 		}
