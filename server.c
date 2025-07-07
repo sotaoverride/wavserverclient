@@ -14,7 +14,7 @@ int main() {
     int addrlen = sizeof(address);
     char buffer[BUFFER_SIZE] = {0};
     FILE *wav_file;
-    char *wav_file_path = "audio.wav";
+    char *wav_file_path = "airplane-landing_daniel_simion.wav";
     size_t bytes_read;
 
     // Create socket
@@ -22,6 +22,8 @@ int main() {
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
