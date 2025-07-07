@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	{
 		//recvBuff[n] = 0;
 		if (fwrite(recvBuff, 1, 
-                     sizeof(recvBuff), stdout) == 0)
+                     n, stdout) != n)
 		{
 			fprintf(stderr, "\n Error : Fputs error\n");
 		}
