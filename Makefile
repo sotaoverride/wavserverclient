@@ -4,6 +4,10 @@ CC = gcc
 # Define CFLAGS (compiler flags) - customize as needed
 CFLAGS = -Wall -Werror -pedantic -std=c17 -O1
 
+# Use pkg-config to get PulseAudio compiler and linker flags
+PULSEAUDIO_CFLAGS := $(shell pkg-config --cflags libpulse)
+PULSEAUDIO_LIBS := $(shell pkg-config --libs libpulse)
+
 # Find all C files in the current directory
 SRCS = $(wildcard *.c)
 
@@ -15,7 +19,7 @@ all: $(BINS)
 
 # Rule to compile each C file into an executable
 %: %.c
-	$(CC) $(CFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) $(PULSEAUDIO_CFLAGS) $(PULSEAUDIO_LIBS) -o $@ $<
 
 # Phony target for cleaning up
 .PHONY: clean
