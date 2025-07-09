@@ -43,15 +43,18 @@ void play_wav_with_pulseaudio(const char *filename) {
 	char buffer[4096];
 	size_t bytes_read;
 
-	fseek(wav_file, 44, SEEK_SET); // Skip WAV header (assuming standard 44-byte header)
+	//fseek(wav_file, 44, SEEK_SET); // Skip WAV header (assuming standard 44-byte header)
 
-	while ( (bytes_read = fread(buffer, 1, sizeof(buffer), wav_file)) ){
+	while ( (bytes_read = fread(buffer, 1, sizeof(buffer), wav_file)) > 0 ){
 		if (pa_simple_write(s, buffer, bytes_read, &error) < 0) {
 			fprintf(stderr, "pa_simple_write() failed: %s\n", pa_strerror(error));
 			break;
 		}
 	}
-
+	/* Make sure that every single sample was played */
+	if (pa_simple_drain(s, &error) < 0) {
+		fprintf(stderr, __FILE__": pa_simple_drain() failed: %s\n", pa_strerror(error));
+	}
 	// Close the file and clean up PulseAudio
 	fclose(wav_file);
 }
@@ -67,15 +70,13 @@ int main() {
 	size_t bytes_read;
 
 	// Read from stdin (e.g., piped output from another program)
-	while ( (bytes_read = fread(buffer, 1, sizeof(buffer), stdin)) ){
-		if (bytes_read > 0) {
-			printf("Read from stdin: %s\n", buffer);
-			fwrite(buffer, 1, bytes_read, pFile);
+	while ( (bytes_read = fread(buffer, 1, sizeof(buffer), stdin)) > 0){
+		printf("Read from stdin: %s\n", buffer);
+		fwrite(buffer, 1, bytes_read, pFile);
 
-		} else {
-			fprintf(stderr, "Error reading from stdin or end of file reached.\n");
-		}
 	}
+	fprintf(stderr, "Error reading from stdin or end of file reached.\n");
+	printf("Done Reading from stdin: \n");
 	play_wav_with_pulseaudio("output.wav");
 	return 0;
 }

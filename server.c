@@ -73,12 +73,14 @@ while (1) {
 
     printf("Finished streaming.\n");
 
-    // Cleanup
+    // Cleanup child
     fclose(wav_file);
     close(new_socket);
 }
+//clean up parent version of new sock
+    close(new_socket);
 }
-// this would never get closed? mem leak??
+//listening sock close
     close(server_fd);
 
     return 0;
