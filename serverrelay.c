@@ -4,21 +4,19 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-
+#include "linkedlist.h"
 #define SERVER_PORT 12345
 #define BUFFER_SIZE 1024
 
 int main() {
 	//socket linked list head
-	stuct Node* head = NULL;
+	struct Node* head = NULL;
 	// Child process id
 	pid_t childpid;
 	int server_fd, new_socket;
 	struct sockaddr_in address;
 	int addrlen = sizeof(address);
 	char buffer[BUFFER_SIZE] = {0};
-	FILE *wav_file;
-	char *wav_file_path = "airplane-landing_daniel_simion.wav";
 	size_t bytes_read;
 
 	// Create socket
