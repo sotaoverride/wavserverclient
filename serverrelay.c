@@ -54,13 +54,16 @@ int main() {
 
 
 		if ((childpid = fork() == 0)){
+			//remove yourself from linked list
+			deleteFromBeginning(&head);
 			while(1){
-				bytes_read = read(new_socket, buffer, BUFFER_SIZE);
+				if ( (bytes_read = read(new_socket, buffer, BUFFER_SIZE)) >0 ){
 				struct Node* tmp = head;
 				while (tmp != NULL) {
 					send(new_socket, buffer, bytes_read, 0);
 					tmp = tmp->next;
 				}
+			}
 			}
 		}
 		//clean up parent version of new sock
