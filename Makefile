@@ -6,7 +6,7 @@ CFLAGS = -Wall -Werror -pedantic -std=c17 -O1
 # Use pkg-config to get PulseAudio compiler and linker flags (linker flags go after the sources)
 PULSEAUDIOSIMPLE_CFLAGS := $(shell pkg-config --cflags libpulse-simple)
 PULSEAUDIOSIMPLE_LIBS := $(shell pkg-config --libs libpulse-simple)
-
+LDFLAGS += -lrt 
 # Find all C files in the current directory
 SRCS = $(wildcard *.c)
 
@@ -18,7 +18,7 @@ all: $(BINS)
 
 # Rule to compile each C file into an executable
 %: %.c
-	$(CC) $(CFLAGS) -o $@ $< $(PULSEAUDIOSIMPLE_LIBS) $(PULSEAUDIOSIMPLE_CFLAGS) 
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS) $(PULSEAUDIOSIMPLE_LIBS) $(PULSEAUDIOSIMPLE_CFLAGS) 
  
 
 # Phony target for cleaning up
