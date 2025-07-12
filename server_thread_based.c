@@ -21,20 +21,13 @@ void *handle_client(void *args) {
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
 	//lets free args->sock??
-	free(&argsPtr->sock);	
 	//shared struct so proct rads with mutex??
 	struct Node* tmp = argsPtr->head;
 	// Implement client communication here (send/recv)
 	printf("Handling client socket: %d\n", client_sock);
 	char buffer[1024];
 	ssize_t bytes_read;	
-	//ssize_t bytes_received = recv(client_sock, buffer, sizeof(buffer) - 1, 0);
-	//if (bytes_received > 0) {
-	//printf("Received from client %d: %s\n", client_sock, buffer);
-	//pthread_mutex_lock(&the_mutex); // Acquire lock
 	wav_file = fopen(wav_file_path, "rb");
-	//if(argsPtr->sock != tmp->data){
-	// Stream audio data
 	int count = 0;
 	pthread_mutex_lock(&the_mutex); // Acquire lock
 	printf("here : \n");
@@ -112,7 +105,6 @@ int main() {
 		client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &client_len);
 		if (client_sock < 0) {
 			perror("accept failed");
-			continue;
 		}
 		else { //insert client socket in linkedlist!
 			pthread_mutex_lock(&the_mutex); // Acquire lock
