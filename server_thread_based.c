@@ -1,17 +1,21 @@
-#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "linkedlist.h"
 #include <pthread.h>
+
+#include "linkedlist.h"
 #define SERVER_PORT 12345
 #define BUFFER_SIZE 1024
 typedef struct {
 	int sock;
 	struct Node* head;
 } ThreadArgs;
+FILE *wav_file;
+char *wav_file_path = "airplane-landing_daniel_simion.wav";
+wav_file = fopen(wav_file_path, "rb");
 
 pthread_mutex_t the_mutex; // Declare a mutex
 void *handle_client(void *args) {
@@ -24,19 +28,23 @@ void *handle_client(void *args) {
 	// Implement client communication here (send/recv)
 	printf("Handling client socket: %d\n", client_sock);
 	char buffer[1024];
-	ssize_t bytes_received = recv(client_sock, buffer, sizeof(buffer) - 1, 0);
-	if (bytes_received > 0) {
-		printf("Received from client %d: %s\n", client_sock, buffer);
-		while (tmp) {
-			if(argsPtr->sock != tmp->data){
-				send(tmp->data, buffer, bytes_received, 0);
-			}
-			pthread_mutex_lock(&the_mutex); // Acquire lock
-			tmp = tmp->next;
-
+	ssize_t bytes_read;	
+	//ssize_t bytes_received = recv(client_sock, buffer, sizeof(buffer) - 1, 0);
+	//if (bytes_received > 0) {
+	printf("Received from client %d: %s\n", client_sock, buffer);
+	pthread_mutex_lock(&the_mutex); // Acquire lock
+	while (tmp) {
+		//if(argsPtr->sock != tmp->data){
+		// Stream audio data
+		while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, wav_file)) > 0) {
+			send(tmp->data, buffer, bytes_read, 0);
 		}
-		pthread_mutex_unlock(&the_mutex); // Release lock
+
+		//}
+		tmp = tmp->next;
+
 	}
+	pthread_mutex_unlock(&the_mutex); // Release lock
 
 	close(client_sock);
 	pthread_exit(NULL);
