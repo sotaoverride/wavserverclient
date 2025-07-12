@@ -2,7 +2,7 @@
 CC = gcc
 
 # Define CFLAGS (compiler flags) - customize as needed
-CFLAGS = -Wall -Werror -pedantic -std=c17 -O1
+CFLAGS = -Wall -Werror -pedantic -std=c17 -O1 -g
 # Use pkg-config to get PulseAudio compiler and linker flags (linker flags go after the sources)
 PULSEAUDIOSIMPLE_CFLAGS := $(shell pkg-config --cflags libpulse-simple)
 PULSEAUDIOSIMPLE_LIBS := $(shell pkg-config --libs libpulse-simple)

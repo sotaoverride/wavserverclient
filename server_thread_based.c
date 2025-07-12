@@ -15,7 +15,6 @@ typedef struct {
 } ThreadArgs;
 FILE *wav_file;
 char *wav_file_path = "airplane-landing_daniel_simion.wav";
-wav_file = fopen(wav_file_path, "rb");
 
 pthread_mutex_t the_mutex; // Declare a mutex
 void *handle_client(void *args) {
@@ -31,20 +30,45 @@ void *handle_client(void *args) {
 	ssize_t bytes_read;	
 	//ssize_t bytes_received = recv(client_sock, buffer, sizeof(buffer) - 1, 0);
 	//if (bytes_received > 0) {
-	printf("Received from client %d: %s\n", client_sock, buffer);
+	//printf("Received from client %d: %s\n", client_sock, buffer);
+	//pthread_mutex_lock(&the_mutex); // Acquire lock
+	wav_file = fopen(wav_file_path, "rb");
+	//if(argsPtr->sock != tmp->data){
+	// Stream audio data
+	int count = 0;
 	pthread_mutex_lock(&the_mutex); // Acquire lock
-	while (tmp) {
-		//if(argsPtr->sock != tmp->data){
-		// Stream audio data
-		while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, wav_file)) > 0) {
-			send(tmp->data, buffer, bytes_read, 0);
-		}
-
-		//}
+	printf("here : \n");
+	while (tmp != NULL){
+		printf("linked list read here :%d \n", count);
+		count++;
 		tmp = tmp->next;
+	}
+	printf("sock count : %d\n", count);
 
+	// Step 2: Dynamically allocate the array
+	int* arr = (int*)malloc(count * sizeof(int));
+	if (arr == NULL) {
+		fprintf(stderr, "Memory allocation failed\n");
+	}
+
+	// Step 3: Populate the array
+	tmp = argsPtr->head;
+	struct Node* current = tmp;
+	int i = 0;
+	while (current != NULL) {
+		arr[i] = current->data;
+		printf("Sock from linked list : %d\n", arr[i]);
+		current = current->next;
+		i++;
 	}
 	pthread_mutex_unlock(&the_mutex); // Release lock
+	for(int j=0;j<count;j++){
+		while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, wav_file)) > 0) {
+			printf("Read from wav : %s\n", buffer);
+			send(arr[j], buffer, bytes_read, 0);
+		}
+	}
+	//	pthread_mutex_unlock(&the_mutex); // Release lock
 
 	close(client_sock);
 	pthread_exit(NULL);
