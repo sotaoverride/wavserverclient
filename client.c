@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 	int sockfd = 0, n = 0;
 	char recvBuff[1024];
 	struct sockaddr_in serv_addr;
-        int server_port = atoi(argv[2]); // Convert port string to integer
+	int server_port = atoi(argv[2]); // Convert port string to integer
 	if(argc != 3)
 	{
 		fprintf(stderr, "\n Usage: %s <ip of server> <port of server>\n",argv[0]);
@@ -57,14 +57,25 @@ int main(int argc, char *argv[])
 	 * on clients socket through clients socket descriptor and client can read it
 	 * through normal read call on the its socket descriptor.
 	 */
+	char goMsgStr[20];
+	sprintf(goMsgStr, "Go Sock %d!", sockfd);  
+	//wait on go sock message from server
 	while ( (n = read(sockfd, recvBuff, sizeof(recvBuff))) > 0)
 	{
-		//recvBuff[n] = 0;
-		if (fwrite(recvBuff, 1, 
-                     n, stdout) != n)
-		{
-			fprintf(stderr, "\n Error : Fputs error\n");
-		}
+		recvBuff[n+1] = 0;
+		printf("recv msg: %s \n", recvBuff);
+		if (!strcmp(goMsgStr,recvBuff)){
+			printf("Go sock string found and Matched \n");
+			break;
+		} 
+	}
+
+	if(n < 0)
+	{
+		fprintf(stderr, "\n Read error \n");
+	}
+	while ( (n = read(sockfd, recvBuff, sizeof(recvBuff))) > 0)
+	{
 	}
 
 	if(n < 0)

@@ -20,10 +20,19 @@ pthread_mutex_t the_mutex; // Declare a mutex
 void *handle_client(void *args) {
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
+	//send this sock Go [sock no here] message
+	char goMsg[20];
+
+	sprintf(goMsg, "Go Sock %d!", client_sock); 
+	size_t goMsgLen = strlen(goMsg);
+	send(client_sock, goMsg, goMsgLen, 0);
+	
 	//lets free args->sock??
-	//shared struct so proct rads with mutex??
+	//shared struct so proctx reads with mutex??
+	pthread_mutex_lock(&the_mutex); // Acquire lock
 	struct Node* tmp = argsPtr->head;
-	// Implement client communication here (send/recv)
+	pthread_mutex_unlock(&the_mutex); // Release lock
+					  // Implement client communication here (send/recv)
 	printf("Handling client socket: %d\n", client_sock);
 	char buffer[1024];
 	ssize_t bytes_read;	
@@ -55,14 +64,14 @@ void *handle_client(void *args) {
 		i++;
 	}
 	pthread_mutex_unlock(&the_mutex); // Release lock
-	for(int j=0;j<count;j++){
-		while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, wav_file)) > 0) {
-			printf("Read from wav : %s\n", buffer);
-			send(arr[j], buffer, bytes_read, 0);
+	while(1){
+		for(int j=0;j<count;j++){
+			while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, wav_file)) > 0) {
+				//printf("Read from wav : %s\n", buffer);
+				send(arr[j], buffer, bytes_read, 0);
+			}
 		}
 	}
-	//	pthread_mutex_unlock(&the_mutex); // Release lock
-
 	close(client_sock);
 	pthread_exit(NULL);
 }
