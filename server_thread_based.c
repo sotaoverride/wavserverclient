@@ -20,18 +20,16 @@ pthread_mutex_t the_mutex; // Declare a mutex
 void *handle_client(void *args) {
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
-	char goMsg[40];
+	char goMsg[40]="\0";
 
 	/*
 		READ Go Sock message from client before proceeding ....
 	*/
 	sprintf(goMsg, "Go Sock %d!", client_sock); 
-	//size_t goMsgLen = strlen(goMsg);
-	goMsg[40]='\0';
+	size_t goMsgLen = strlen(goMsg);
 	char goMsgRecv[40]="\0";
-	while(strcmp(goMsgRecv,goMsg)){
-		int n = read(client_sock, goMsg, 40);
-		goMsg[n+1]='\0';
+	while(memcmp(goMsgRecv,goMsg,goMsgLen)){
+		int n = read(client_sock, goMsg, goMsgLen);
 		if(n < 1 ) {}
 		printf("msg read from clinet %s \n", goMsg);
 	}	

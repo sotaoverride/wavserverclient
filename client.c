@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	while ( (n = read(sockfd, recvGo, length)) > 0)
 	{
 		printf("recv msg: %s \n", recvGo);
-		if (!strcmp(goMsgStr,recvGo)){
+		if (!memcmp(goMsgStr,recvGo, length)){
 			printf("Go sock string found and Matched \n");
 			break;
 		} 
