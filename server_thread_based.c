@@ -23,16 +23,23 @@ void *handle_client(void *args) {
 	char goMsg[40]="\0";
 
 	/*
-		READ Go Sock message from client before proceeding ....
-	*/
-	sprintf(goMsg, "%s", "Go Sock %d!"); 
+	   READ Go Sock message from client before proceeding ....
+	 */
+	sprintf(goMsg, "Go Sock %d!", client_sock); 
 	size_t goMsgLen = strlen(goMsg);
 	char goMsgRecv[40]="\0";
-	while(memcmp(goMsgRecv,goMsg,goMsgLen)){
-		int n = read(client_sock, goMsg, goMsgLen);
-		if(n < 1 ) {}
-		printf("msg read from clinet %s \n", goMsg);
+	while(memcmp(goMsgRecv,goMsg,goMsgLen) != 0){
+		int n = 		read(client_sock, goMsgRecv, goMsgLen);
+		if(n < goMsgLen){
+			printf(" wtf, didnt read entire msg from client: %s  org msg %s\n", goMsgRecv, goMsg);
+
+		}
+		else{
+
+			printf(" entire msg from client: %s  org msg %s\n", goMsgRecv, goMsg);
+		}
 	}	
+	send(client_sock, goMsg, goMsgLen, 0);
 	pthread_mutex_lock(&the_mutex); // Acquire lock
 	struct Node* tmp = argsPtr->head;
 	pthread_mutex_unlock(&the_mutex); // Release lock

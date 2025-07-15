@@ -58,14 +58,14 @@ int main(int argc, char *argv[])
 	 * through normal read call on the its socket descriptor.
 	 */
 	char goMsgStr[40]="\0";
-	sprintf(goMsgStr, "%s", "Go Sock %d!");  
+	sprintf(goMsgStr, "Go Sock %d!", sockfd);  
 	size_t length = strlen(goMsgStr);
 	printf("lendgth of gstr in client %ld", length);
 	goMsgStr[length+1]='\0';
 	char recvGo[length+1];
 	//wait on go sock message from server
-	n = send(sockfd, goMsgStr, 40, 0);
-	while ( (n = read(sockfd, recvGo, length)) > 0)
+	n = send(sockfd, goMsgStr, length, 0);
+	while ( (n = read(sockfd, recvGo, length)) == length)
 	{
 		printf("recv msg: %s \n", recvGo);
 		if (!memcmp(goMsgStr,recvGo, length)){
@@ -73,13 +73,13 @@ int main(int argc, char *argv[])
 			break;
 		} 
 		else{
-			printf("Go sock string recvd from server: %s \n", recvGo );
-			n = send(sockfd, goMsgStr, 40, 0);
+			printf("Go sock string recvd from server: %s  orgginal string %s \n", recvGo, goMsgStr );
+			n = send(sockfd, goMsgStr, length, 0);
 			}
 		printf("still waiting on msg from server ... \n");
 	}
 
-	if(n < 0)
+	if(n < length)
 	{
 		fprintf(stderr, "\n Read error \n");
 	}
