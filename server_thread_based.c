@@ -25,7 +25,7 @@ void *handle_client(void *args) {
 	/*
 		READ Go Sock message from client before proceeding ....
 	*/
-	sprintf(goMsg, "Go Sock %d!", client_sock); 
+	sprintf(goMsg, "%s", "Go Sock %d!"); 
 	size_t goMsgLen = strlen(goMsg);
 	char goMsgRecv[40]="\0";
 	while(memcmp(goMsgRecv,goMsg,goMsgLen)){

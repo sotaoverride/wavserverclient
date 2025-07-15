@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 	 * through normal read call on the its socket descriptor.
 	 */
 	char goMsgStr[40]="\0";
-	sprintf(goMsgStr, "Go Sock %d!", sockfd);  
+	sprintf(goMsgStr, "%s", "Go Sock %d!");  
 	size_t length = strlen(goMsgStr);
 	printf("lendgth of gstr in client %ld", length);
 	goMsgStr[length+1]='\0';
