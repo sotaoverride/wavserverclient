@@ -20,15 +20,21 @@ pthread_mutex_t the_mutex; // Declare a mutex
 void *handle_client(void *args) {
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
-	//send this sock Go [sock no here] message
-	char goMsg[20];
+	char goMsg[40];
 
+	/*
+		READ Go Sock message from client before proceeding ....
+	*/
 	sprintf(goMsg, "Go Sock %d!", client_sock); 
-	size_t goMsgLen = strlen(goMsg);
-	send(client_sock, goMsg, goMsgLen, 0);
-	
-	//lets free args->sock??
-	//shared struct so proctx reads with mutex??
+	//size_t goMsgLen = strlen(goMsg);
+	goMsg[40]='\0';
+	char goMsgRecv[40]="\0";
+	while(strcmp(goMsgRecv,goMsg)){
+		int n = read(client_sock, goMsg, 40);
+		goMsg[n+1]='\0';
+		if(n < 1 ) {}
+		printf("msg read from clinet %s \n", goMsg);
+	}	
 	pthread_mutex_lock(&the_mutex); // Acquire lock
 	struct Node* tmp = argsPtr->head;
 	pthread_mutex_unlock(&the_mutex); // Release lock

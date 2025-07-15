@@ -57,17 +57,26 @@ int main(int argc, char *argv[])
 	 * on clients socket through clients socket descriptor and client can read it
 	 * through normal read call on the its socket descriptor.
 	 */
-	char goMsgStr[20];
+	char goMsgStr[40]="\0";
 	sprintf(goMsgStr, "Go Sock %d!", sockfd);  
+	size_t length = strlen(goMsgStr);
+	printf("lendgth of gstr in client %ld", length);
+	goMsgStr[length+1]='\0';
+	char recvGo[length+1];
 	//wait on go sock message from server
-	while ( (n = read(sockfd, recvBuff, sizeof(recvBuff))) > 0)
+	n = send(sockfd, goMsgStr, 40, 0);
+	while ( (n = read(sockfd, recvGo, length)) > 0)
 	{
-		recvBuff[n+1] = 0;
-		printf("recv msg: %s \n", recvBuff);
-		if (!strcmp(goMsgStr,recvBuff)){
+		printf("recv msg: %s \n", recvGo);
+		if (!strcmp(goMsgStr,recvGo)){
 			printf("Go sock string found and Matched \n");
 			break;
 		} 
+		else{
+			printf("Go sock string recvd from server: %s \n", recvGo );
+			n = send(sockfd, goMsgStr, 40, 0);
+			}
+		printf("still waiting on msg from server ... \n");
 	}
 
 	if(n < 0)
