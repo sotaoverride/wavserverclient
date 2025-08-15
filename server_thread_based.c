@@ -18,71 +18,28 @@ char *wav_file_path = "airplane-landing_daniel_simion.wav";
 
 pthread_mutex_t the_mutex; // Declare a mutex
 void *handle_client(void *args) {
+	char goMsgRecv[40]={0};
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
-	char goMsg[40]="\0";
-
-	/*
-	   READ Go Sock message from client before proceeding ....
-	 */
-	sprintf(goMsg, "Go Sock %d!", client_sock); 
-	size_t goMsgLen = strlen(goMsg);
-	char goMsgRecv[40]="\0";
-	while(memcmp(goMsgRecv,goMsg,goMsgLen) != 0){
-		int n = 		read(client_sock, goMsgRecv, goMsgLen);
-		if(n < goMsgLen){
-			printf(" wtf, didnt read entire msg from client: %s  org msg %s\n", goMsgRecv, goMsg);
-
-		}
-		else{
-
-			printf(" entire msg from client: %s  org msg %s\n", goMsgRecv, goMsg);
-		}
-	}	
-	send(client_sock, goMsg, goMsgLen, 0);
+	//first read
+	int n = read(client_sock, goMsgRecv, 40);
+	if (!n) printf("frist read failed,  %d \n", client_sock);
 	pthread_mutex_lock(&the_mutex); // Acquire lock
 	struct Node* tmp = argsPtr->head;
 	pthread_mutex_unlock(&the_mutex); // Release lock
-					  // Implement client communication here (send/recv)
-	printf("Handling client socket: %d\n", client_sock);
-	char buffer[1024];
-	ssize_t bytes_read;	
-	wav_file = fopen(wav_file_path, "rb");
-	int count = 0;
 	pthread_mutex_lock(&the_mutex); // Acquire lock
-	printf("here : \n");
-	while (tmp != NULL){
-		printf("linked list read here :%d \n", count);
-		count++;
+	while (tmp != NULL) {
+		if(tmp->data != client_sock){
+			send(tmp->data, "Hello from new cleint", strlen("Hello from new client"), 0);
+			
+		}
+		
 		tmp = tmp->next;
-	}
-	printf("sock count : %d\n", count);
-
-	// Step 2: Dynamically allocate the array
-	int* arr = (int*)malloc(count * sizeof(int));
-	if (arr == NULL) {
-		fprintf(stderr, "Memory allocation failed\n");
-	}
-
-	// Step 3: Populate the array
-	tmp = argsPtr->head;
-	struct Node* current = tmp;
-	int i = 0;
-	while (current != NULL) {
-		arr[i] = current->data;
-		printf("Sock from linked list : %d\n", arr[i]);
-		current = current->next;
-		i++;
 	}
 	pthread_mutex_unlock(&the_mutex); // Release lock
 	while(1){
-		for(int j=0;j<count;j++){
-			while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, wav_file)) > 0) {
-				//printf("Read from wav : %s\n", buffer);
-				send(arr[j], buffer, bytes_read, 0);
-			}
+			n = read(client_sock, goMsgRecv, 40);
 		}
-	}
 	close(client_sock);
 	pthread_exit(NULL);
 }
