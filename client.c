@@ -13,7 +13,7 @@
 int main(int argc, char *argv[])
 {
 	int sockfd = 0, n = 0;
-	char recvBuff[1024];
+	char recvBuff[1024]={'\0'};
 	struct sockaddr_in serv_addr;
 	int server_port = atoi(argv[2]); // Convert port string to integer
 	if(argc != 3)
@@ -62,29 +62,16 @@ int main(int argc, char *argv[])
 	size_t length = strlen(goMsgStr);
 	printf("lendgth of gstr in client %ld", length);
 	goMsgStr[length+1]='\0';
-	char recvGo[length+1];
-	//wait on go sock message from server
-	n = send(sockfd, goMsgStr, length, 0);
-	while ( (n = read(sockfd, recvGo, length)) == length)
-	{
-		printf("recv msg: %s \n", recvGo);
-		if (!memcmp(goMsgStr,recvGo, length)){
-			printf("Go sock string found and Matched \n");
-			break;
-		} 
-		else{
-			printf("Go sock string recvd from server: %s  orgginal string %s \n", recvGo, goMsgStr );
-			n = send(sockfd, goMsgStr, length, 0);
-			}
-		printf("still waiting on msg from server ... \n");
-	}
-
+	n = send(sockfd, goMsgStr, length+1, 0);
 	if(n < length)
 	{
 		fprintf(stderr, "\n Read error \n");
 	}
-	while ( (n = read(sockfd, recvBuff, sizeof(recvBuff))) > 0)
+	while ( (n = read(sockfd, recvBuff, 40)) > 0)
 	{
+		printf("LENGTH OF STRING READ BY CLIENT: %d \n", n);
+		recvBuff[n+1]='\0';
+		printf("%s \n", recvBuff);
 	}
 
 	if(n < 0)

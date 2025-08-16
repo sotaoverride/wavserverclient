@@ -18,7 +18,7 @@ char *wav_file_path = "airplane-landing_daniel_simion.wav";
 
 pthread_mutex_t the_mutex; // Declare a mutex
 void *handle_client(void *args) {
-	char goMsgRecv[40]={0};
+	char goMsgRecv[40]={'\0'};
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
 	//first read
