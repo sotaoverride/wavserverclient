@@ -22,7 +22,7 @@ void *handle_client(void *args) {
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
 	//first read
-	char buffer[1024];
+	char buffer[1024]={0};
     	FILE *fp;int n = read(client_sock, goMsgRecv, 40);
 	if (!n) printf("frist read failed,  %d \n", client_sock);
 	goMsgRecv[n+1]='\0';
@@ -32,7 +32,7 @@ void *handle_client(void *args) {
 	pthread_mutex_lock(&the_mutex); // Acquire lock
 	while (tmp != NULL) {
 		if(tmp->data != client_sock){
-			send(tmp->data, goMsgRecv, n+1, 0);
+			//send(tmp->data, goMsgRecv, n+1, 0);
 			
 		}
 		

@@ -68,22 +68,10 @@ int main(int argc, char *argv[])
 	{
 		fprintf(stderr, "\n Send error?? \n");
 	}
-	int wavBytesRead = 0;
 	while ( (n = read(sockfd, recvBuff, sizeof(recvBuff))) > 0)
 	{
-		if (!(strstr(recvBuff, "RIFF"))){
-			       //start of audio stream, so quit printing announcments for ~ 	2494872/1024 reads (size of wav file)
-			       wavBytesRead=0;
-			       }
-		if (wavBytesRead < 249872){
 		if (fwrite(recvBuff, 1, n , stdout) !=n ) {
 			fprintf(stderr, "\n Error: Fwrite errir\n");
-		}
-		wavBytesRead+=1024;}
-		else{
-		printf("LENGTH OF STRING READ BY CLIENT: %d \n", n);
-		recvBuff[n+1]='\0';
-		printf("%s \n", recvBuff);
 		}
 	}
 
@@ -91,6 +79,7 @@ int main(int argc, char *argv[])
 	{
 		fprintf(stderr, "\n Read error \n");
 	}
+
 
 	return 0;
 }
