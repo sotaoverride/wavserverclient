@@ -16,9 +16,10 @@ int main(int argc, char *argv[])
 	char recvBuff[1024]={'\0'};
 	struct sockaddr_in serv_addr;
 	int server_port = atoi(argv[2]); // Convert port string to integer
-	if(argc != 3)
+	char * client_name = argv[3];
+	if(argc != 4)
 	{
-		fprintf(stderr, "\n Usage: %s <ip of server> <port of server>\n",argv[0]);
+		fprintf(stderr, "\n Usage: %s <ip of server> <port of server> <client name>\n",argv[0]);
 		return 1;
 	}
 
@@ -58,20 +59,32 @@ int main(int argc, char *argv[])
 	 * through normal read call on the its socket descriptor.
 	 */
 	char goMsgStr[40]="\0";
-	sprintf(goMsgStr, "Go Sock %d!", sockfd);  
+	sprintf(goMsgStr, "Hello from:  %s!", client_name);  
 	size_t length = strlen(goMsgStr);
 	printf("lendgth of gstr in client %ld", length);
 	goMsgStr[length+1]='\0';
 	n = send(sockfd, goMsgStr, length+1, 0);
 	if(n < length)
 	{
-		fprintf(stderr, "\n Read error \n");
+		fprintf(stderr, "\n Send error?? \n");
 	}
-	while ( (n = read(sockfd, recvBuff, 40)) > 0)
+	int wavBytesRead = 0;
+	while ( (n = read(sockfd, recvBuff, sizeof(recvBuff))) > 0)
 	{
+		if (!(strstr(recvBuff, "RIFF"))){
+			       //start of audio stream, so quit printing announcments for ~ 	2494872/1024 reads (size of wav file)
+			       wavBytesRead=0;
+			       }
+		if (wavBytesRead < 249872){
+		if (fwrite(recvBuff, 1, n , stdout) !=n ) {
+			fprintf(stderr, "\n Error: Fwrite errir\n");
+		}
+		wavBytesRead+=1024;}
+		else{
 		printf("LENGTH OF STRING READ BY CLIENT: %d \n", n);
 		recvBuff[n+1]='\0';
 		printf("%s \n", recvBuff);
+		}
 	}
 
 	if(n < 0)

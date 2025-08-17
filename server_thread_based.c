@@ -22,24 +22,32 @@ void *handle_client(void *args) {
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
 	//first read
-	int n = read(client_sock, goMsgRecv, 40);
+	char buffer[1024];
+    	FILE *fp;int n = read(client_sock, goMsgRecv, 40);
 	if (!n) printf("frist read failed,  %d \n", client_sock);
+	goMsgRecv[n+1]='\0';
 	pthread_mutex_lock(&the_mutex); // Acquire lock
 	struct Node* tmp = argsPtr->head;
 	pthread_mutex_unlock(&the_mutex); // Release lock
 	pthread_mutex_lock(&the_mutex); // Acquire lock
 	while (tmp != NULL) {
 		if(tmp->data != client_sock){
-			send(tmp->data, "Hello from new cleint", strlen("Hello from new client"), 0);
+			send(tmp->data, goMsgRecv, n+1, 0);
 			
 		}
 		
 		tmp = tmp->next;
 	}
 	pthread_mutex_unlock(&the_mutex); // Release lock
-	while(1){
-			n = read(client_sock, goMsgRecv, 40);
-		}
+	fp = fopen("airplane-landing_daniel_simion.wav", "rb"); // Open your WAV file
+    	// ... error handling ...
+
+    	while (!feof(fp)) {
+        	size_t bytes_read = fread(buffer, 1, BUFFER_SIZE, fp);
+        	if (bytes_read > 0) {
+            	send(client_sock, buffer, bytes_read, 0);
+        	}
+    	}	
 	close(client_sock);
 	pthread_exit(NULL);
 }
