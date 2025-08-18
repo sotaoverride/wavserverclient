@@ -51,6 +51,7 @@ void *handle_client(void *args) {
 			send(client_sock, &audMsg, sizeof(Message)-1024+bytes_read, 0);
 		}
 	}	
+	while(1){}
 	close(client_sock);
 	pthread_exit(NULL);
 }

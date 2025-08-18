@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 					fprintf(stderr, "\n Error: Fwrite errir\n");
 				}
 			}
-			else if(recvMsg.Type == Announcement) { if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , stdout) !=n-sizeof(recvMsg.Type) ) {
+			else if(recvMsg.Type == Announcement) { if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , ap) !=n-sizeof(recvMsg.Type) ) {
 				fprintf(stderr, "\n Error: Fwrite errir\n");
 			}
 			}	
