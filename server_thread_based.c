@@ -22,23 +22,23 @@ void *handle_client(void *args) {
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
 	Message Announce;
-	int n = read(client_sock, &Announce, sizeof(Announce));
+	int n = read(client_sock, &Announce, sizeof(Message));
 	if (!n) printf("frist read failed,  %d \n", client_sock);
-	Announce.Data[n+1]='\0';
 	pthread_mutex_lock(&the_mutex); // Acquire lock
 	struct Node* tmp = argsPtr->head;
 	pthread_mutex_unlock(&the_mutex); // Release lock
 	pthread_mutex_lock(&the_mutex); // Acquire lock
 	while (tmp != NULL && Announce.Type == Announcement) {
 		if(tmp->data != client_sock){
+			printf("ANNOUNCING!!!! \n");
 			send(tmp->data, &Announce, sizeof(Announce), 0);
+			printf("SENT!!!! \n");
 
 		}
 
 		tmp = tmp->next;
 	}
-	//char goMsgRecv[40]={'\0'};
-	//first read
+	pthread_mutex_unlock(&the_mutex); // Release lock
 	FILE *fp;
 	fp = fopen("airplane-landing_daniel_simion.wav", "rb"); // Open your WAV file
 								// ... error handling ...
@@ -61,6 +61,7 @@ int main() {
 	int server_sock, client_sock;
 	struct sockaddr_in address, client_addr;
 	socklen_t client_len;
+	pthread_mutex_init(&the_mutex, NULL); 
 
 	// Create socket
 	server_sock = socket(AF_INET, SOCK_STREAM, 0);

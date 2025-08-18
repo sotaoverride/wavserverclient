@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 	sp = fopen("stream.wav", "wb"); // Open your WAV file
 	FILE *ap;
 	ap = fopen("announcments.txt", "a+b"); // Open your WAV file
-
+	setbuf(ap, NULL);
 	while (1) {
 		while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0)
 		{
@@ -86,11 +86,13 @@ int main(int argc, char *argv[])
 					fprintf(stderr, "\n Error: Fwrite errir\n");
 				}
 			}
-			else { if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , ap) !=n-sizeof(recvMsg.Type) ) {
+			else if(recvMsg.Type == Announcement) { if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , stdout) !=n-sizeof(recvMsg.Type) ) {
 				fprintf(stderr, "\n Error: Fwrite errir\n");
 			}
 			}	
-
+			else{
+				printf(" Message Type not found !!!!!!!!!!!!\n");
+			}
 			if(n < 0)
 			{
 				fprintf(stderr, "\n Read error \n");
