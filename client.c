@@ -9,11 +9,12 @@
 #include <unistd.h>
 #include <errno.h>
 #include <arpa/inet.h>
+#include "MessageType.h"
 
 int main(int argc, char *argv[])
 {
 	int sockfd = 0, n = 0;
-	char recvBuff[1024]={'\0'};
+	Message recvMsg;
 	struct sockaddr_in serv_addr;
 	int server_port = atoi(argv[2]); // Convert port string to integer
 	char * client_name = argv[3];
@@ -23,7 +24,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	memset(recvBuff, '0',sizeof(recvBuff));
+	memset(&recvMsg, '0',sizeof(recvMsg));
 
 	/* a socket is created through call to socket() function */
 	if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -61,16 +62,21 @@ int main(int argc, char *argv[])
 	char goMsgStr[40]="\0";
 	sprintf(goMsgStr, "Hello from:  %s!", client_name);  
 	size_t length = strlen(goMsgStr);
-	printf("lendgth of gstr in client %ld", length);
+	//printf("lendgth of gstr in client %ld", length);
 	goMsgStr[length+1]='\0';
-	n = send(sockfd, goMsgStr, length+1, 0);
+	/*n = send(sockfd, goMsgStr, length+1, 0);
 	if(n < length)
 	{
 		fprintf(stderr, "\n Send error?? \n");
 	}
-	while ( (n = read(sockfd, recvBuff, sizeof(recvBuff))) > 0)
+
+	*/
+	FILE *sp;
+	sp = fopen("stream.wav", "wb"); // Open your WAV file
+	
+	while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0)
 	{
-		if (fwrite(recvBuff, 1, n , stdout) !=n ) {
+		if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , sp) !=n-sizeof(recvMsg.Type) ) {
 			fprintf(stderr, "\n Error: Fwrite errir\n");
 		}
 	}

@@ -7,26 +7,27 @@
 #include <pthread.h>
 
 #include "linkedlist.h"
+#include "MessageType.h"
 #define SERVER_PORT 12345
 #define BUFFER_SIZE 1024
 typedef struct {
 	int sock;
 	struct Node* head;
 } ThreadArgs;
-FILE *wav_file;
+FILE *wav_file, *stream;
 char *wav_file_path = "airplane-landing_daniel_simion.wav";
 
 pthread_mutex_t the_mutex; // Declare a mutex
 void *handle_client(void *args) {
-	char goMsgRecv[40]={'\0'};
+	//char goMsgRecv[40]={'\0'};
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
 	//first read
-	char buffer[1024]={0};
-    	FILE *fp;int n = read(client_sock, goMsgRecv, 40);
+    	FILE *fp;
+	/*int n = read(client_sock, goMsgRecv, 40);
 	if (!n) printf("frist read failed,  %d \n", client_sock);
 	goMsgRecv[n+1]='\0';
-	pthread_mutex_lock(&the_mutex); // Acquire lock
+	*/pthread_mutex_lock(&the_mutex); // Acquire lock
 	struct Node* tmp = argsPtr->head;
 	pthread_mutex_unlock(&the_mutex); // Release lock
 	pthread_mutex_lock(&the_mutex); // Acquire lock
@@ -42,10 +43,12 @@ void *handle_client(void *args) {
 	fp = fopen("airplane-landing_daniel_simion.wav", "rb"); // Open your WAV file
     	// ... error handling ...
 
+	Message audMsg;
+	audMsg.Type = Audio;
     	while (!feof(fp)) {
-        	size_t bytes_read = fread(buffer, 1, BUFFER_SIZE, fp);
+        	size_t bytes_read = fread(audMsg.Data, 1, sizeof(audMsg.Data), fp);
         	if (bytes_read > 0) {
-            	send(client_sock, buffer, bytes_read, 0);
+            	send(client_sock, &audMsg, sizeof(Message)-1024+bytes_read, 0);
         	}
     	}	
 	close(client_sock);
