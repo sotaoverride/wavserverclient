@@ -19,38 +19,38 @@ char *wav_file_path = "airplane-landing_daniel_simion.wav";
 
 pthread_mutex_t the_mutex; // Declare a mutex
 void *handle_client(void *args) {
-	//char goMsgRecv[40]={'\0'};
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
-	//first read
-    	FILE *fp;
-	/*int n = read(client_sock, goMsgRecv, 40);
+	Message Announce;
+	int n = read(client_sock, &Announce, sizeof(Announce));
 	if (!n) printf("frist read failed,  %d \n", client_sock);
-	goMsgRecv[n+1]='\0';
-	*/pthread_mutex_lock(&the_mutex); // Acquire lock
+	Announce.Data[n+1]='\0';
+	pthread_mutex_lock(&the_mutex); // Acquire lock
 	struct Node* tmp = argsPtr->head;
 	pthread_mutex_unlock(&the_mutex); // Release lock
 	pthread_mutex_lock(&the_mutex); // Acquire lock
-	while (tmp != NULL) {
+	while (tmp != NULL && Announce.Type == Announcement) {
 		if(tmp->data != client_sock){
-			//send(tmp->data, goMsgRecv, n+1, 0);
-			
+			send(tmp->data, &Announce, sizeof(Announce), 0);
+
 		}
-		
+
 		tmp = tmp->next;
 	}
-	pthread_mutex_unlock(&the_mutex); // Release lock
+	//char goMsgRecv[40]={'\0'};
+	//first read
+	FILE *fp;
 	fp = fopen("airplane-landing_daniel_simion.wav", "rb"); // Open your WAV file
-    	// ... error handling ...
+								// ... error handling ...
 
 	Message audMsg;
 	audMsg.Type = Audio;
-    	while (!feof(fp)) {
-        	size_t bytes_read = fread(audMsg.Data, 1, sizeof(audMsg.Data), fp);
-        	if (bytes_read > 0) {
-            	send(client_sock, &audMsg, sizeof(Message)-1024+bytes_read, 0);
-        	}
-    	}	
+	while (!feof(fp)) {
+		size_t bytes_read = fread(audMsg.Data, 1, sizeof(audMsg.Data), fp);
+		if (bytes_read > 0) {
+			send(client_sock, &audMsg, sizeof(Message)-1024+bytes_read, 0);
+		}
+	}	
 	close(client_sock);
 	pthread_exit(NULL);
 }

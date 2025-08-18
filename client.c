@@ -64,26 +64,38 @@ int main(int argc, char *argv[])
 	size_t length = strlen(goMsgStr);
 	//printf("lendgth of gstr in client %ld", length);
 	goMsgStr[length+1]='\0';
-	/*n = send(sockfd, goMsgStr, length+1, 0);
+	recvMsg.Type = Announcement;
+	memcpy(&recvMsg.Data, goMsgStr, length+1);
+	n = send(sockfd, &recvMsg, sizeof(recvMsg), 0);
 	if(n < length)
 	{
 		fprintf(stderr, "\n Send error?? \n");
 	}
 
-	*/
+
 	FILE *sp;
 	sp = fopen("stream.wav", "wb"); // Open your WAV file
-	
-	while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0)
-	{
-		if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , sp) !=n-sizeof(recvMsg.Type) ) {
-			fprintf(stderr, "\n Error: Fwrite errir\n");
-		}
-	}
+	FILE *ap;
+	ap = fopen("announcments.txt", "a+b"); // Open your WAV file
 
-	if(n < 0)
-	{
-		fprintf(stderr, "\n Read error \n");
+	while (1) {
+		while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0)
+		{
+			if(recvMsg.Type == Audio){
+				if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , sp) !=n-sizeof(recvMsg.Type) ) {
+					fprintf(stderr, "\n Error: Fwrite errir\n");
+				}
+			}
+			else { if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , ap) !=n-sizeof(recvMsg.Type) ) {
+				fprintf(stderr, "\n Error: Fwrite errir\n");
+			}
+			}	
+
+			if(n < 0)
+			{
+				fprintf(stderr, "\n Read error \n");
+			}
+		}
 	}
 
 

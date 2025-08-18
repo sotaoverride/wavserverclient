@@ -2,7 +2,7 @@
 #define MESSAGE_TYPE_H 
 typedef enum {
 	Audio,
-	Announcment,
+	Announcement,
 } MsgType;
 typedef struct {
 	MsgType Type;
