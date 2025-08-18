@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	ap = fopen("announcments.txt", "a+b"); // Open your WAV file
 	setbuf(ap, NULL);
 	while (1) {
-		while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0)
+		while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0 && ( n == sizeof(recvMsg)) )
 		{
 			if(recvMsg.Type == Audio){
 				if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , sp) !=n-sizeof(recvMsg.Type) ) {
