@@ -79,23 +79,40 @@ int main(int argc, char *argv[])
 	ap = fopen("announcments.txt", "a+b"); // Open your WAV file
 	setbuf(ap, NULL);
 	while (1) {
-		while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0 && ( n == sizeof(recvMsg)) )
+		while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0  )
 		{
-			if(recvMsg.Type == Audio){
-				if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , sp) !=n-sizeof(recvMsg.Type) ) {
+			if ( n == sizeof(recvMsg)){
+				if(recvMsg.Type == Audio){
+					if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , sp) !=n-sizeof(recvMsg.Type) ) {
+						fprintf(stderr, "\n Error: Fwrite errir\n");
+					}
+				}
+				else if(recvMsg.Type == Announcement) { if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , ap) !=n-sizeof(recvMsg.Type) ) {
 					fprintf(stderr, "\n Error: Fwrite errir\n");
 				}
+				}	
+				else{
+					printf(" Message Type not found !!!!!!!!!!!!\n");
+				}
+				if(n < 0)
+				{
+					fprintf(stderr, "\n Read error \n");
+				}
 			}
-			else if(recvMsg.Type == Announcement) { if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , ap) !=n-sizeof(recvMsg.Type) ) {
-				fprintf(stderr, "\n Error: Fwrite errir\n");
-			}
-			}	
-			else{
-				printf(" Message Type not found !!!!!!!!!!!!\n");
-			}
-			if(n < 0)
-			{
-				fprintf(stderr, "\n Read error \n");
+			else {
+				int j = n;
+				int k = sizeof(recvMsg);
+				char tmp[j];//={0};
+				memcpy(tmp, &recvMsg, j);
+				while (j<k && k > 0){
+					char tmp2[k-j];//={0};
+					int l  = read(sockfd, &tmp2, k-j);
+					memcpy(&recvMsg+l, tmp2, l);
+					k = k - l;
+					j = j + l;
+
+				}
+
 			}
 		}
 	}
