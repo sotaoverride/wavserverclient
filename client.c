@@ -81,7 +81,6 @@ int main(int argc, char *argv[])
 	while (1) {
 		while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0  )
 		{
-				fprintf(stderr, "\n Read error \n");
 			if ( n == sizeof(recvMsg)){
 				if(recvMsg.Type == Audio){
 					if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , sp) !=n-sizeof(recvMsg.Type) ) {
@@ -123,8 +122,7 @@ int main(int argc, char *argv[])
 
 		}
 		
-		fprintf(stderr, "\n Read error \n");
-		exit(1);
+		fprintf(stderr, "\n Read error read return value %d \n", n);
 	}
 
 
