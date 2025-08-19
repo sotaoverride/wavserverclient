@@ -47,9 +47,16 @@ void *handle_client(void *args) {
 	audMsg.Type = Audio;
 	while (!feof(fp)) {
 		size_t bytes_read = fread(audMsg.Data, 1, sizeof(audMsg.Data), fp);
-		if (bytes_read > 0) {
-			send(client_sock, &audMsg, sizeof(Message)-1024+bytes_read, 0);
+		if (bytes_read == sizeof(Message) ) {
+			send(client_sock, &audMsg, sizeof(Message), 0);
 		}
+		else{
+			Message tmp = {0};
+			tmp.Type = Audio;
+			memcpy(&tmp.Data, &audMsg.Data, bytes_read);
+			send(client_sock, &tmp, sizeof(Message), 0);
+		}
+
 	}	
 	while(1){}
 	close(client_sock);
