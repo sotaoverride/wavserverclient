@@ -101,8 +101,13 @@ int main(int argc, char *argv[])
 				while (j<k){
 					char tmp2[k-j];//={0};
 					int l  = read(sockfd, &tmp2, k-j);
+					if (l > 0){
 					memcpy((char*)&recvMsg+j, tmp2, l);
 					j = j + l;
+					}
+					else{
+						printf("Partial Read Failed!!! \n\n");
+					}
 
 				}
 
@@ -123,6 +128,7 @@ int main(int argc, char *argv[])
 		}
 		
 		fprintf(stderr, "\n Read error read return value %d \n", n);
+		exit(1);
 	}
 
 
