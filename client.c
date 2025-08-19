@@ -102,13 +102,10 @@ int main(int argc, char *argv[])
 			else {
 				int j = n;
 				int k = sizeof(recvMsg);
-				char tmp[j];//={0};
-				memcpy(tmp, &recvMsg, j);
-				while (j<k && k > 0){
+				while (j<k){
 					char tmp2[k-j];//={0};
 					int l  = read(sockfd, &tmp2, k-j);
-					memcpy(&recvMsg+l, tmp2, l);
-					k = k - l;
+					memcpy((char*)&recvMsg+j, tmp2, l);
 					j = j + l;
 
 				}
