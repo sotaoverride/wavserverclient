@@ -122,7 +122,9 @@ int main(int argc, char *argv[])
 			}
 
 		}
+		
 		fprintf(stderr, "\n Read error \n");
+		exit(1);
 	}
 
 
