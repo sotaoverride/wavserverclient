@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
 	while (1) {
 		while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0  )
 		{
+GETMSGTYPE:
 			if ( n == sizeof(recvMsg)){
 				if(recvMsg.Type == Audio){
 					if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , sp) !=n-sizeof(recvMsg.Type) ) {
@@ -109,6 +110,7 @@ int main(int argc, char *argv[])
 					j = j + l;
 
 				}
+				goto GETMSGTYPE;
 
 			}
 		}
