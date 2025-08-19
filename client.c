@@ -112,11 +112,11 @@ int main(int argc, char *argv[])
 				}
 
 				if(recvMsg.Type == Audio){
-					if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , sp) !=n-sizeof(recvMsg.Type) ) {
+					if (fwrite(recvMsg.Data, 1, k-j , sp) !=k-j)  {
 						fprintf(stderr, "\n Error: Fwrite errir\n");
 					}
 				}
-				else if(recvMsg.Type == Announcement) { if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , ap) !=n-sizeof(recvMsg.Type) ) {
+				else if(recvMsg.Type == Announcement) { if (fwrite(recvMsg.Data, 1, j-k , ap) !=j-k ) {
 					fprintf(stderr, "\n Error: Fwrite errir\n");
 				}
 				}	
