@@ -79,58 +79,30 @@ int main(int argc, char *argv[])
 	ap = fopen("announcments.txt", "a+b"); // Open your WAV file
 	setbuf(ap, NULL);
 	while (1) {
-		while ( (n = read(sockfd, &recvMsg, sizeof(recvMsg))) > 0  )
-		{
-			if ( n == sizeof(recvMsg)){
-				if(recvMsg.Type == Audio){
-					if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , sp) !=n-sizeof(recvMsg.Type) ) {
-						fprintf(stderr, "\n Error: Fwrite errir\n");
-					}
-				}
-				else if(recvMsg.Type == Announcement) { if (fwrite(recvMsg.Data, 1, n-sizeof(recvMsg.Type) , ap) !=n-sizeof(recvMsg.Type) ) {
-					fprintf(stderr, "\n Error: Fwrite errir\n");
-				}
-				}	
-				else{
-					printf(" Message Type not found !!!!!!!!!!!!\n");
-				}
+		int totalMessageBytes=sizeof(Message);
+		while( totalMessageBytes != 0) {
+			int m = read(sockfd, &recvMsg+(sizeof(Message)-totalMessageBytes), totalMessageBytes);
+			if (m >0) {
+				totalMessageBytes -= m;
 			}
-			else {
-				int j = n;
-				int k = sizeof(recvMsg);
-				while (j<k){
-					char tmp2[k-j];//={0};
-					int l  = read(sockfd, &tmp2, k-j);
-					if (l > 0){
-					memcpy((char*)&recvMsg+j, tmp2, l);
-					j = j + l;
-					}
-					else{
-						printf("Partial Read Failed!!! \n\n");
-					}
+			else{
+				fprintf(stderr, "\n Read error read return value %d \n", n);
 
-				}
-
-				if(recvMsg.Type == Audio){
-					if (fwrite(recvMsg.Data, 1, k-j , sp) !=k-j)  {
-						fprintf(stderr, "\n Error: Fwrite errir\n");
-					}
-				}
-				else if(recvMsg.Type == Announcement) { if (fwrite(recvMsg.Data, 1, j-k , ap) !=j-k ) {
-					fprintf(stderr, "\n Error: Fwrite errir\n");
-				}
-				}	
-				else{
-					printf(" Message Type not found !!!!!!!!!!!!\n");
-				}
 			}
-
 		}
-		
-		fprintf(stderr, "\n Read error read return value %d \n", n);
-		exit(1);
+		if(recvMsg.Type == Audio){
+			if (fwrite(recvMsg.Data, 1, sizeof(Message) , sp) !=sizeof(Message))  {
+				fprintf(stderr, "\n Error: Fwrite errir\n");
+			}
+		}
+		else if(recvMsg.Type == Announcement) { if (fwrite(recvMsg.Data, 1, sizeof(Message) , ap) !=sizeof(Message) ) {
+			fprintf(stderr, "\n Error: Fwrite errir\n");
+		}
+		}	
+		else{
+			printf(" Message Type not found !!!!!!!!!!!!\n");
+		}
+
 	}
-
-
 	return 0;
 }
