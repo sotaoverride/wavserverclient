@@ -78,7 +78,7 @@ int main() {
 						fds[i].fd = new_fd;
 						fds[i].events = POLLIN;
 						printf("New client connected on socket %d\n", new_fd);
-						//break;
+						break;
 					}
 					else {
 						if (Announce.Type == Announcement) {
@@ -98,7 +98,10 @@ int main() {
 
 		FILE *fp;                                                                         
 		fp = fopen("airplane-landing_daniel_simion.wav", "rb"); // Open your WAV file     
-									// ... error handling ... 
+		if (fp == NULL) {
+        		perror("Error opening file for writing");
+        		return 1; // Indicate an error
+    		}						// ... error handling ... 
 
 		Message audMsg;                                                                   
 		audMsg.Type = Audio;                                                              
