@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 	while (1) {
 		int totalMessageBytes=sizeof(Message);
 		while( totalMessageBytes != 0) {
-			int m = read(sockfd, &recvMsg+(sizeof(Message)-totalMessageBytes), totalMessageBytes);
+			int m = read(sockfd, (char*)&recvMsg+(sizeof(Message)-totalMessageBytes), totalMessageBytes);
 			if (m >0) {
 				totalMessageBytes -= m;
 			}
