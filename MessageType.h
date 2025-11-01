@@ -3,6 +3,7 @@
 typedef enum {
 	Audio,
 	Announcement,
+	WBMsg,
 } MsgType;
 typedef struct {
 	MsgType Type;
