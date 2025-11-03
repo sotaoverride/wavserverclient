@@ -20,6 +20,7 @@ void *input_thread_func(void *arg) {
 	fd_set read_fds;
 	struct timeval tv;
 	int retval;
+	int sockfd = *(int *)(arg);
 
 	while (1) {
 		FD_ZERO(&read_fds);
@@ -40,6 +41,7 @@ void *input_thread_func(void *arg) {
 			if (bytes_read > 0 && (buffer[bytes_read -1] == '\n')) {
 				buffer[bytes_read] = '\0';
 				printf("Input received: %s", buffer);
+				send(sockfd, &buffer, strlen(buffer), 0);
 			} else if (bytes_read == 0) {
 				printf("End of input (EOF)\n");
 				break;
@@ -119,12 +121,12 @@ int main(int argc, char *argv[]) {
 	fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
 
 	// Create the input handling thread
-	if (pthread_create(&input_thread, NULL, input_thread_func, NULL) != 0) {
+	if (pthread_create(&input_thread, NULL, input_thread_func, (void *) &sockfd) != 0) {
 		perror("pthread_create");
 		return 1;
 	}
 	// Create the sock read handling thread
-	if (pthread_create(&sock_read_thread, NULL, sock_read_thread_func, &sockfd) != 0) {
+	if (pthread_create(&sock_read_thread, NULL, sock_read_thread_func, (void *) &sockfd) != 0) {
 		perror("pthread_create");
 		return 1;
 	}
