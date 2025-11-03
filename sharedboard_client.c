@@ -15,6 +15,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
+pthread_mutex_t printf_mutex; // Declare a mutex
+pthread_mutex_t sock_mutex; // Declare a mutex
 void *input_thread_func(void *arg) {
 	char buffer[256];
 	fd_set read_fds;
@@ -40,10 +42,16 @@ void *input_thread_func(void *arg) {
 			ssize_t bytes_read = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);
 			if (bytes_read > 0 && (buffer[bytes_read -1] == '\n')) {
 				buffer[bytes_read] = '\0';
+				pthread_mutex_lock(&printf_mutex); //  lock
 				printf("Input received: %s", buffer);
+				pthread_mutex_unlock(&printf_mutex); // Release lock
+				pthread_mutex_lock(&sock_mutex); //  lock
 				send(sockfd, &buffer, strlen(buffer), 0);
+				pthread_mutex_unlock(&sock_mutex); // Release lock
 			} else if (bytes_read == 0) {
+				pthread_mutex_lock(&printf_mutex); //  lock
 				printf("End of input (EOF)\n");
+				pthread_mutex_unlock(&printf_mutex); // Release lock
 				break;
 			} else {
 				perror("read");
@@ -51,7 +59,9 @@ void *input_thread_func(void *arg) {
 			}
 		} else {
 			// Timeout occurred, no input
+			pthread_mutex_lock(&printf_mutex); //  lock
 			printf("No input for 1 second...\n");
+			pthread_mutex_unlock(&printf_mutex); // Release lock
 		}
 	}
 	return NULL;
@@ -61,7 +71,9 @@ void *sock_read_thread_func(void *arg) {
 	Message recvMsg;
 	int sockfd = *(int *)(arg);
 	while(1){
+		pthread_mutex_lock(&sock_mutex); //  lock
 		int m = read(sockfd, (char *)&recvMsg, sizeof(Message));
+		pthread_mutex_unlock(&sock_mutex); // Release lock
 		if (m>0){
 			//print message data
 		}
