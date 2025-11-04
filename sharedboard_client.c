@@ -24,58 +24,57 @@ void *input_thread_func(void *arg) {
 	int retval;
 	int sockfd = *(int *)(arg);
 
+
+	// Set a timeout for select (e.g., 1 second)
+	tv.tv_sec = 8;
+	tv.tv_usec = 0;
 	while (1) {
 		FD_ZERO(&read_fds);
 		FD_SET(STDIN_FILENO, &read_fds);
-
 		// Set a timeout for select (e.g., 1 second)
 		tv.tv_sec = 1;
 		tv.tv_usec = 0;
 
-		retval = select(STDIN_FILENO + 1, &read_fds, NULL, NULL, &tv);
+		retval = select(STDIN_FILENO +1, &read_fds, NULL, NULL, &tv);
 
 		if (retval == -1) {
 			perror("select");
+			printf("broken out of while?? \n");
 			break;
 		} else if (retval) {
 			// STDIN is ready to be read
 			ssize_t bytes_read = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);
 			if (bytes_read > 0 && (buffer[bytes_read -1] == '\n')) {
 				buffer[bytes_read] = '\0';
-				pthread_mutex_lock(&printf_mutex); //  lock
 				printf("Input received: %s", buffer);
-				pthread_mutex_unlock(&printf_mutex); // Release lock
-				pthread_mutex_lock(&sock_mutex); //  lock
 				send(sockfd, &buffer, strlen(buffer), 0);
-				pthread_mutex_unlock(&sock_mutex); // Release lock
 			} else if (bytes_read == 0) {
-				pthread_mutex_lock(&printf_mutex); //  lock
 				printf("End of input (EOF)\n");
-				pthread_mutex_unlock(&printf_mutex); // Release lock
-				break;
+				//break;
 			} else {
 				perror("read");
-				break;
+				//break;
 			}
 		} else {
 			// Timeout occurred, no input
-			pthread_mutex_lock(&printf_mutex); //  lock
 			printf("No input for 1 second...\n");
-			pthread_mutex_unlock(&printf_mutex); // Release lock
 		}
 	}
 	return NULL;
 }
 
 void *sock_read_thread_func(void *arg) {
-	Message recvMsg;
+	//Message recvMsg;
+	//memset(recvMsg.Data, '\0', 256);
+	char recvbuf[256] = {'\0'};
 	int sockfd = *(int *)(arg);
+	int m =0;
 	while(1){
-		pthread_mutex_lock(&sock_mutex); //  lock
-		int m = read(sockfd, (char *)&recvMsg, sizeof(Message));
-		pthread_mutex_unlock(&sock_mutex); // Release lock
+		m = read(sockfd, recvbuf, 256);
+
 		if (m>0){
 			//print message data
+			printf("%s \n", recvbuf);
 		}
 		else{
 			fprintf(stderr, "\n Read earror read return value %d \n", m);
@@ -141,11 +140,6 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	// Main thread can perform other tasks
-	for (int i = 0; i < 5; ++i) {
-		printf("Main thread working...\n");
-		sleep(2);
-	}
 
 	// Join the input thread (optional, depending on application logic)
 	pthread_join(input_thread, NULL);

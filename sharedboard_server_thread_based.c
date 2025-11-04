@@ -21,19 +21,22 @@ pthread_mutex_t the_mutex; // Declare a mutex
 void *handle_client(void *args) {
 	ThreadArgs* argsPtr = (ThreadArgs*)args;
 	int client_sock = argsPtr->sock;
-	Message WBMsgPost;
+	//Message WBMsgPost;
+	char buffer[256] = {'\0'};
 	pthread_mutex_lock(&the_mutex); // Acquire lock
 	struct Node* tmp = argsPtr->head;
 	pthread_mutex_unlock(&the_mutex); // Release lock
 	int n;
-	while(1){ n = read(client_sock, &WBMsgPost, sizeof(Message));
-		if (!n) printf("read failed, %d \n", client_sock);
+	while(1){ n = read(client_sock, buffer, 256);
+		if (!n){} //printf("read failed, %d \n", client_sock);
 		else //send read data to all other connected clients
 		{pthread_mutex_lock(&the_mutex); // Acquire lock
-			while (tmp != NULL && WBMsgPost.Type == WBMsg) {
+			tmp = argsPtr->head;
+			while (tmp != NULL ) {
 				if(tmp->data != client_sock){
 					printf("Sharing Whiteboard message!!!! \n");
-					send(tmp->data, &WBMsgPost, sizeof(WBMsgPost), 0);
+					printf("buffer received %s \n", buffer);
+					send(tmp->data, buffer, 256, 0);
 					printf("SENT!!!! \n");
 
 				}
@@ -106,7 +109,7 @@ int main() {
 			free(head);
 			continue;
 		}
-		pthread_detach(thread_id); // Detach the thread to clean up resources automatically
+		//pthread_detach(thread_id); // Detach the thread to clean up resources automatically
 	}
 
 	close(server_sock);
