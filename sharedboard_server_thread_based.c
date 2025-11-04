@@ -91,7 +91,7 @@ int main() {
 		}
 		else { //insert client socket in linkedlist!
 			pthread_mutex_lock(&the_mutex); // Acquire lock
-			insertAtBeginning(&head, client_sock);
+			insertAtEnd(&head, client_sock);
 			pthread_mutex_unlock(&the_mutex); // Release lock
 		}
 
