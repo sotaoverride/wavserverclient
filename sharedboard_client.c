@@ -50,10 +50,10 @@ void *input_thread_func(void *arg) {
 				send(sockfd, &buffer, strlen(buffer), 0);
 			} else if (bytes_read == 0) {
 				printf("End of input (EOF)\n");
-				//break;
+				break;
 			} else {
 				perror("read");
-				//break;
+				break;
 			}
 		} else {
 			// Timeout occurred, no input
