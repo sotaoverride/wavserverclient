@@ -87,7 +87,6 @@ void *sock_read_thread_func(void *arg) {
 int main(int argc, char *argv[]) {
 	pthread_t input_thread, sock_read_thread;
 	int sockfd = 0;
-	Message recvMsg;
 	struct sockaddr_in serv_addr;
 	int server_port = atoi(argv[2]); // Convert port string to integer
 	if(argc != 4)
@@ -96,7 +95,6 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	memset(&recvMsg, '0',sizeof(recvMsg));
 
 	/* a socket is created through call to socket() function */
 	if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
