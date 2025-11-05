@@ -109,7 +109,7 @@ int main() {
 			free(head);
 			continue;
 		}
-		//pthread_detach(thread_id); // Detach the thread to clean up resources automatically
+		pthread_detach(thread_id); // Detach the thread to clean up resources automatically
 	}
 
 	close(server_sock);
