@@ -17,6 +17,43 @@
 #include <fcntl.h>
 pthread_mutex_t printf_mutex; // Declare a mutex
 pthread_mutex_t sock_mutex; // Declare a mutex
+typedef struct {
+	int recvdMsgCount;
+	// other members
+} ClientStats;
+
+// Static pointer to hold the single instance
+static ClientStats* global_singleton_client_stats_instance = NULL;
+
+// Function to initialize and get the singleton instance
+ClientStats* get_singleton_client_stats_instance() {
+	if (global_singleton_client_stats_instance == NULL) {
+		// Allocate memory for the singleton
+		global_singleton_client_stats_instance = (ClientStats*)malloc(sizeof(ClientStats));
+		if (global_singleton_client_stats_instance == NULL) {
+			perror("Failed to allocate memory for client stats");
+			exit(EXIT_FAILURE);
+		}
+		// Initialize members
+		global_singleton_client_stats_instance->recvdMsgCount = 0; 
+		printf("Client stats Singleton instance created.\n");
+	}
+	return global_singleton_client_stats_instance;
+}
+
+// Function to clean up the singleton (optional, but good practice)
+void destroy_singleton_client_stats_instance() {
+	if (global_singleton_client_stats_instance != NULL) {
+		free(global_singleton_client_stats_instance);
+		global_singleton_client_stats_instance = NULL;
+		printf("Singleton client stats instance destroyed.\n");
+	}
+}
+ClientStats* CS = NULL;
+typedef struct ArgSRT{
+	int sockFD;
+	ClientStats cs;
+} ASRT;
 void *input_thread_func(void *arg) {
 	char buffer[256];
 	fd_set read_fds;
@@ -67,14 +104,16 @@ void *sock_read_thread_func(void *arg) {
 	//Message recvMsg;
 	//memset(recvMsg.Data, '\0', 256);
 	char recvbuf[256] = {'\0'};
-	int sockfd = *(int *)(arg);
+	ASRT * argPtr= (ASRT *) arg;
 	int m =0;
 	while(1){
-		m = read(sockfd, recvbuf, 256);
+		m = read(argPtr->sockFD, recvbuf, 256);
 
 		if (m>0){
 			//print message data
+			argPtr->cs.recvdMsgCount++;
 			printf("%s \n", recvbuf);
+			printf("received messag count for this client %d \n" , argPtr->cs.recvdMsgCount); 
 		}
 		else{
 			fprintf(stderr, "\n Read earror read return value %d \n", m);
@@ -83,7 +122,9 @@ void *sock_read_thread_func(void *arg) {
 
 	return NULL;
 }
+
 int main(int argc, char *argv[]) {
+	CS = get_singleton_client_stats_instance();
 	pthread_t input_thread, sock_read_thread;
 	int sockfd = 0;
 	struct sockaddr_in serv_addr;
@@ -134,8 +175,11 @@ int main(int argc, char *argv[]) {
 		perror("pthread_create");
 		return 1;
 	}
+	ASRT asrt;
+	asrt.sockFD = sockfd;
+	asrt.cs = *CS;
 	// Create the sock read handling thread
-	if (pthread_create(&sock_read_thread, NULL, sock_read_thread_func, (void *) &sockfd) != 0) {
+	if (pthread_create(&sock_read_thread, NULL, sock_read_thread_func, (void *) &asrt) != 0) {
 		perror("pthread_create");
 		return 1;
 	}
