@@ -18,6 +18,21 @@
 pthread_mutex_t printf_mutex; // Declare a mutex
 pthread_mutex_t sock_mutex; // Declare a mutex
 typedef struct {
+    int (*socket_func)(int domain, int type, int protocol);
+    int (*connect_func) (int sockfd, const struct sockaddr *addr,
+                   socklen_t addrlen);
+    int (*bind_func)(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+    int (*listen_func)(int sockfd, int backlog);
+    int (*accept_func)(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+    ssize_t (*send_func)(int sockfd, const void *buf, size_t len, int flags);
+    ssize_t (*recv_func)(int sockfd, void *buf, size_t len, int flags);
+    int (*close_func)(int fd);
+} SocketInterface;
+typedef struct{
+	SocketInterface sock;
+} SharedBoardClient;
+
+typedef struct {
 	int recvdMsgCount;
 	// other members
 } ClientStats;
@@ -124,6 +139,7 @@ void *sock_read_thread_func(void *arg) {
 }
 
 int main(int argc, char *argv[]) {
+	SharedBoardClient sbc={{socket, connect, bind, listen, accept, send, recv, close}};
 	CS = get_singleton_client_stats_instance();
 	pthread_t input_thread, sock_read_thread;
 	int sockfd = 0;
@@ -137,7 +153,7 @@ int main(int argc, char *argv[]) {
 
 
 	/* a socket is created through call to socket() function */
-	if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	if((sockfd = sbc.sock.socket_func(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		fprintf(stderr, "\n Error : Could not create socket \n");
 		return 1;
@@ -159,7 +175,7 @@ int main(int argc, char *argv[]) {
 	 * which tries to connect this socket with the socket (IP address and port)
 	 * of the remote host
 	 */
-	if( connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+	if( sbc.sock.connect_func(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
 	{
 		fprintf(stderr, "\n Error : Connect Failed \n");
 		return 1;
